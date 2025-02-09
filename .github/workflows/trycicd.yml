@@ -5,7 +5,7 @@ on:
       - main
 
 env:
-  IMAGE_TAG: latest
+  IMAGE_TAG:  ${{ github.sha }}
   ECS_CLUSTER: RkDevCluster
   ECS_SERVICE: mynodeappservice
   ECS_TASK_DEFINITION: .aws/mynodejsapptaskdef.json
@@ -23,6 +23,9 @@ jobs:
 
       - name: Running Lint
         run: echo "Lint..." 
+
+      - name: container image name
+        run: echo ${{ secrets.ECR_REPOSITORY }}:$IMAGE_TAG         
 
       - name: Configure AWS Credentials
         uses: aws-actions/configure-aws-credentials@v2
@@ -65,7 +68,7 @@ jobs:
 
 
       - name: container image name
-        run: echo "${{ secrets.ECR_REPOSITORY }}:$IMAGE_TAG" 
+        run: echo ${{ secrets.ECR_REPOSITORY }}:$IMAGE_TAG 
 
       - name: Fill in the new image ID in the Amazon ECS task definition
         id: task-def
@@ -73,7 +76,7 @@ jobs:
         with:
           task-definition: ${{ env.ECS_TASK_DEFINITION }}
           container-name: ${{ env.CONTAINER_NAME }}
-          image: ${{ secrets.ECR_REPOSITORY }}:latest        
+          image: ${{ secrets.ECR_REPOSITORY }}:$IMAGE_TAG        
 
       - name: Deploy Amazon ECS task definition
         uses: aws-actions/amazon-ecs-deploy-task-definition@v1
