@@ -5,7 +5,7 @@ on:
       - main
 
 env:
-  IMAGE_TAG: ${{ github.sha }}
+  IMAGE_TAG: $(git rev-parse --short HEAD) 
   ECS_CLUSTER: RkDevCluster
   ECS_SERVICE: mynodeappservice
   ECS_TASK_DEFINITION: .aws/mynodejsapptaskdef.json
@@ -22,7 +22,7 @@ jobs:
         uses: actions/checkout@v3
 
       - name: Running Lint
-        run: ${{ env.IMAGE_TAG }}
+        run: echo "Lint...."
 
       - name: Configure AWS Credentials
         uses: aws-actions/configure-aws-credentials@v2
