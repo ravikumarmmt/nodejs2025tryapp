@@ -5,7 +5,7 @@ on:
       - main
 
 env:
-  IMAGE_TAG: $(git rev-parse --short HEAD) 
+  IMAGE_TAG: ${{ github.sha }}
   ECS_CLUSTER: RkDevCluster
   ECS_SERVICE: mynodeappservice
   ECS_TASK_DEFINITION: .aws/mynodejsapptaskdef.json
