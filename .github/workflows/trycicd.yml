@@ -1,4 +1,5 @@
 name: Deploy to AWS ECS
+
 on:
   push:
     branches:
@@ -10,10 +11,8 @@ env:
   ECS_SERVICE: nodejsapp-aug082025-service
   ECS_TASK_DEFINITION: .aws/mynodejsapptaskdef.json
   CONTAINER_NAME: nodeappAug082025Cont
-  ECS_REGION: us-east-1
-  ECR_REGION: us-east-2
-
-
+  ECS_REGION: us-east-1       # ECS cluster region
+  ECR_REGION: us-east-2       # ECR repo region
 
 jobs:
   pushtoecr:
@@ -27,33 +26,26 @@ jobs:
       - name: Running Lint
         run: echo "Lint...."
 
-      - name: Configure AWS Credentials
+      - name: Configure AWS Credentials for ECR
         uses: aws-actions/configure-aws-credentials@v2
         with:
           aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY_ID }}
           aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
-          aws-region: ${{ secrets.AWS_REGION }}
+          aws-region: ${{ env.ECR_REGION }}
           
       - name: Login to Amazon ECR
         run: |
-          aws ecr get-login-password --region ${{ secrets.AWS_REGION }} | docker login --username AWS --password-stdin ${{ secrets.ECR_REPOSITORY }}
+          aws ecr get-login-password --region ${{ env.ECR_REGION }} \
+          | docker login --username AWS --password-stdin ${{ secrets.ECR_REPOSITORY }}
 
       - name: Build Docker Image
         run: |
-          IMAGE_TAG=latest
-          echo "IMAGE_TAG=$IMAGE_TAG" >> $GITHUB_ENV
-          docker build -t ${{ secrets.ECR_REPOSITORY }}:$IMAGE_TAG .
-
-      - name: Tag Docker Image
-        run: |
-          docker tag ${{ secrets.ECR_REPOSITORY }}:$IMAGE_TAG ${{ secrets.ECR_REPOSITORY }}:$IMAGE_TAG
+          echo "IMAGE_TAG=${{ env.IMAGE_TAG }}" >> $GITHUB_ENV
+          docker build -t ${{ secrets.ECR_REPOSITORY }}:${{ env.IMAGE_TAG }} .
 
       - name: Push Docker Image to ECR
         run: |
-          docker push ${{ secrets.ECR_REPOSITORY }}:$IMAGE_TAG
-          
-      - name: container image name
-        run: echo ${{ secrets.ECR_REPOSITORY }}:$IMAGE_TAG 
+          docker push ${{ secrets.ECR_REPOSITORY }}:${{ env.IMAGE_TAG }}
 
   deploy:
     name: Deploy to AWS ECS (EC2)
@@ -64,12 +56,12 @@ jobs:
       - name: Checkout Code
         uses: actions/checkout@v3
 
-      - name: Configure AWS Credentials
+      - name: Configure AWS Credentials for ECS
         uses: aws-actions/configure-aws-credentials@v2
         with:
           aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY_ID }}
           aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
-          aws-region: ${{ env.ECR_REGION }}
+          aws-region: ${{ env.ECS_REGION }}
       
       - name: Fill in the new image ID in the Amazon ECS task definition
         id: task-def
@@ -77,7 +69,7 @@ jobs:
         with:
           task-definition: ${{ env.ECS_TASK_DEFINITION }}
           container-name: ${{ env.CONTAINER_NAME }}
-          image: ${{ secrets.ECR_REPOSITORY }}:latest        
+          image: ${{ secrets.ECR_REPOSITORY }}:${{ env.IMAGE_TAG }}        
 
       - name: Deploy Amazon ECS task definition
         uses: aws-actions/amazon-ecs-deploy-task-definition@df9643053eda01f169e64a0e60233aacca83799a
@@ -86,4 +78,3 @@ jobs:
           service: ${{ env.ECS_SERVICE }}
           cluster: ${{ env.ECS_CLUSTER }}
           wait-for-service-stability: true
-
