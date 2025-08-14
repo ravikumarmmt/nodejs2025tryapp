@@ -9,7 +9,7 @@ env:
   ECS_CLUSTER: rkNodeAppClusterAug14ASG
   ECS_SERVICE: nodeAppAug142025Service
   ECS_TASK_DEFINITION: .aws/mynodejsapptaskdef.json
-  CONTAINER_NAME: nodeappAug082025Cont
+  CONTAINER_NAME: nodeappAug142025cont
   ECS_REGION: us-east-1
   ECR_REGION: us-east-1 
 
