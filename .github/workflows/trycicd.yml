@@ -6,8 +6,8 @@ on:
 
 env:
   IMAGE_TAG: latest
-  ECS_CLUSTER: rkDevclusterAug2025cluster
-  ECS_SERVICE: nodejsappAug082025Service
+  ECS_CLUSTER: rkNodeAppClusterAug14ASG
+  ECS_SERVICE: nodeAppAug142025Service
   ECS_TASK_DEFINITION: .aws/mynodejsapptaskdef.json
   CONTAINER_NAME: nodeappAug082025Cont
   ECS_REGION: us-east-1
@@ -63,7 +63,7 @@ jobs:
 
     steps:
       - name: Checkout Code
-        uses: actions/checkout@v3
+        uses: actions/checkout@v3 
 
       - name: Configure AWS Credentials
         uses: aws-actions/configure-aws-credentials@v2
