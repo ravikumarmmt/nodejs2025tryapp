@@ -6,8 +6,8 @@ on:
 
 env:
   IMAGE_TAG: latest
-  ECS_CLUSTER: rkNodeAppClusterAug14
-  ECS_SERVICE: nodeappDefAug142025service
+  ECS_CLUSTER: tstcluster
+  ECS_SERVICE: nodeappAug142025-service
   ECS_TASK_DEFINITION: .aws/mynodejsapptaskdef.json
   CONTAINER_NAME: nodeappAug142025cont
   ECS_REGION: us-east-1
